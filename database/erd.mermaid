@@ -1,0 +1,213 @@
+erDiagram
+    ADMINISTRATORS ||--o{ REGISTRATION_REVIEWS : makes
+    ADMINISTRATORS ||--o{ LOAN_REVIEWS : makes
+    ADMINISTRATORS |o--o{ WITHDRAWAL_REQUESTS : reviews
+    ADMINISTRATORS ||--o{ COMPANY_INCOME : records
+    ADMINISTRATORS ||--o{ MONEY_BACK_COMPUTATIONS : computes
+    ADMINISTRATORS ||--o{ ADMIN_ACTIVITY_LOGS : performs
+
+    USERS ||--|| USER_PROFILES : has
+    USERS ||--o{ BANK_DETAILS : owns
+    USERS ||--o{ REGISTRATION_APPLICATIONS : submits
+    USERS ||--o{ LOAN_APPLICATIONS : applies
+    USERS ||--o| SAVINGS_ACCOUNTS : holds
+    USERS ||--o{ PREMIUM_ALLOCATIONS : receives
+
+    REGISTRATION_APPLICATIONS ||--o{ APPLICATION_DOCUMENTS : contains
+    REGISTRATION_APPLICATIONS ||--|| EMPLOYMENT_INFO : includes
+    REGISTRATION_APPLICATIONS ||--o| REGISTRATION_REVIEWS : decided_by
+
+    LOAN_APPLICATIONS ||--o| LOAN_REVIEWS : decided_by
+    LOAN_APPLICATIONS ||--o{ LOAN_TRANSACTIONS : has
+    LOAN_APPLICATIONS ||--o{ PAYMENT_SCHEDULES : scheduled_in
+    PAYMENT_SCHEDULES ||--o| BILLING_STATEMENTS : billed_in
+    BILLING_STATEMENTS ||--o{ LOAN_PAYMENTS : settled_by
+    LOAN_TRANSACTIONS ||--o| LOAN_PAYMENTS : recorded_as
+
+    SAVINGS_ACCOUNTS ||--o{ SAVINGS_TRANSACTIONS : has
+    SAVINGS_ACCOUNTS ||--o{ WITHDRAWAL_REQUESTS : requests
+    SAVINGS_TRANSACTIONS |o--o| WITHDRAWAL_REQUESTS : results_in
+
+    COMPANY_INCOME ||--o| MONEY_BACK_COMPUTATIONS : basis_of
+    MONEY_BACK_COMPUTATIONS ||--o{ PREMIUM_ALLOCATIONS : distributes
+    SAVINGS_TRANSACTIONS |o--o| PREMIUM_ALLOCATIONS : credited_as
+
+    ADMINISTRATORS {
+        int admin_id PK
+        varchar username UK
+        varchar password_hash
+        varchar full_name
+        varchar email UK
+        varchar role
+        varchar status
+        datetime created_at
+    }
+    USERS {
+        int user_id PK
+        varchar username UK
+        varchar password_hash
+        varchar email UK
+        varchar account_type "Basic or Premium"
+        varchar account_status "Active or Disabled"
+        datetime created_at
+    }
+    USER_PROFILES {
+        int user_id PK, FK
+        varchar first_name
+        varchar middle_name
+        varchar last_name
+        date birth_date
+        varchar gender
+        varchar civil_status
+        varchar phone
+        varchar address
+    }
+    BANK_DETAILS {
+        int bank_detail_id PK
+        int user_id FK
+        varchar bank_name
+        varchar account_name
+        varchar account_number
+        boolean is_primary
+    }
+    REGISTRATION_APPLICATIONS {
+        int application_id PK
+        int user_id FK
+        varchar requested_type
+        varchar status
+        datetime submitted_at
+    }
+    APPLICATION_DOCUMENTS {
+        int document_id PK
+        int application_id FK
+        varchar document_type
+        varchar file_path
+        datetime uploaded_at
+    }
+    EMPLOYMENT_INFO {
+        int employment_id PK
+        int application_id FK, UK
+        varchar employer_name
+        varchar position
+        varchar employment_type
+        decimal monthly_income
+        date date_started
+    }
+    REGISTRATION_REVIEWS {
+        int review_id PK
+        int application_id FK, UK
+        int admin_id FK
+        varchar decision
+        varchar remarks
+        datetime reviewed_at
+    }
+    LOAN_APPLICATIONS {
+        int loan_id PK
+        int user_id FK
+        decimal loan_amount
+        decimal interest_rate
+        int term_months
+        varchar purpose
+        varchar status
+        datetime applied_at
+    }
+    LOAN_REVIEWS {
+        int review_id PK
+        int loan_id FK, UK
+        int admin_id FK
+        varchar decision
+        varchar remarks
+        datetime reviewed_at
+    }
+    LOAN_TRANSACTIONS {
+        int loan_txn_id PK
+        int loan_id FK
+        varchar txn_type
+        decimal amount
+        datetime txn_date
+        varchar reference_no UK
+    }
+    PAYMENT_SCHEDULES {
+        int schedule_id PK
+        int loan_id FK
+        int installment_no
+        date due_date
+        decimal principal_due
+        decimal interest_due
+    }
+    BILLING_STATEMENTS {
+        int statement_id PK
+        int schedule_id FK, UK
+        date statement_date
+        decimal penalty_amount
+        decimal total_due
+        varchar payment_status
+    }
+    LOAN_PAYMENTS {
+        int payment_id PK
+        int statement_id FK
+        int loan_txn_id FK, UK
+        decimal amount_paid
+        date payment_date
+        varchar payment_method
+    }
+    SAVINGS_ACCOUNTS {
+        int savings_id PK
+        int user_id FK, UK
+        decimal balance
+        datetime opened_at
+    }
+    SAVINGS_TRANSACTIONS {
+        int savings_txn_id PK
+        int savings_id FK
+        varchar txn_type "Deposit, Withdrawal, MoneyBack"
+        decimal amount
+        varchar status
+        datetime txn_date
+        varchar reference_no UK
+    }
+    WITHDRAWAL_REQUESTS {
+        int request_id PK
+        int savings_id FK
+        decimal amount
+        varchar status
+        datetime requested_at
+        int admin_id FK
+        datetime reviewed_at
+        varchar remarks
+        int savings_txn_id FK, UK
+    }
+    COMPANY_INCOME {
+        int income_id PK
+        int income_year UK
+        decimal total_income
+        int recorded_by FK
+        datetime recorded_at
+    }
+    MONEY_BACK_COMPUTATIONS {
+        int computation_id PK
+        int income_id FK, UK
+        decimal pool_percentage
+        decimal pool_amount
+        decimal total_premium_savings
+        int computed_by FK
+        datetime computed_at
+    }
+    PREMIUM_ALLOCATIONS {
+        int allocation_id PK
+        int computation_id FK
+        int user_id FK
+        decimal savings_basis
+        decimal share_percentage
+        decimal allocated_amount
+        int savings_txn_id FK, UK
+    }
+    ADMIN_ACTIVITY_LOGS {
+        int log_id PK
+        int admin_id FK
+        varchar action
+        varchar target_table
+        int target_id
+        varchar description
+        datetime logged_at
+    }
